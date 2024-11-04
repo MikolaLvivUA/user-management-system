@@ -60,7 +60,10 @@ export class UsersController {
   })
   @ApiResponse({ type: UserResponse })
   @HttpCode(HttpStatus.OK)
-  async updateById(@Param('id') id: string, @Body() data: Partial<CreateUserDto>): Promise<UserResponse> {
+  async updateById(
+    @Param('id') id: string,
+    @Body() data: Partial<CreateUserDto>,
+  ): Promise<UserResponse> {
     return await this.usersService.updateById(id, data);
   }
 

@@ -1,12 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
-import { CreateUserDto, UpdateUserDto, UserResponse } from './dto';
+import { CreateUserDto, UserResponse } from './dto';
 import { LoggerServiceDecorator } from 'src/common';
 import { UsersRepository } from '../repository';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class UsersService {
-  constructor(private userRepository: UsersRepository) {}
+  constructor(
+    private userRepository: UsersRepository,
+    @InjectQueue('users-queue') private readonly userQueue: Queue,
+  ) {}
 
   @LoggerServiceDecorator()
   async create(data: CreateUserDto): Promise<UserResponse> {
@@ -14,13 +19,17 @@ export class UsersService {
       const { password, firstName, lastName } = data;
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      return await this.userRepository.create({
+      const user: any = await this.userRepository.create({
         data: {
           firstName,
           lastName,
           password: hashedPassword,
         },
       });
+
+      await this.userQueue.add('sendNotification', { userId: user.id }, { delay: 10000 });
+      // await this.userQueue.add('sendNotification', { userId: user.id }, { delay: 24 * 60 * 60 * 1000 });
+      return user;
     } catch (error) {
       throw new BadRequestException(`[create-Users] error: ${error.message}`);
     }
@@ -53,14 +62,15 @@ export class UsersService {
         throw new BadRequestException('User not found');
       }
 
-      if(data.password) {
+      if (data.password) {
         const hashedPassword = await bcrypt.hash(data.password, 10);
-        return await this.userRepository.update( { where: { id },
+        return await this.userRepository.update({
+          where: { id },
           data: {
             ...data,
-              password: hashedPassword
-          }
-        })
+            password: hashedPassword,
+          },
+        });
       }
 
       return await this.userRepository.update({ where: { id }, data });

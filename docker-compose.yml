@@ -1,7 +1,9 @@
 version: '3.8'
+
 services:
   postgres:
     image: postgres:16.4
+    container_name: postgres
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -15,15 +17,51 @@ services:
       - '5434:5432'
     volumes:
       - ./storage/postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  redis-mq:
+    image: redis:latest
+    container_name: redis-mq
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - redis-mq
 
   users:
+    container_name: users-microservice
     build:
       context: ./users-microservice
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/defaultdb
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/defaultdb?schema=public
       - PORT=3000
     ports:
       - '3000:3000'
     depends_on:
       - postgres
+      - redis-mq
+    networks:
+      - redis-mq
+      - app-network
+
+  messages:
+    container_name: notifications-microservice
+    build:
+      context: ./notifications-microservice
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3001
+    ports:
+      - '3001:3001'
+    depends_on:
+      - redis-mq
+    networks:
+      - redis-mq
+
+networks:
+  redis-mq:
+    driver: bridge
+  app-network:
+    driver: bridge

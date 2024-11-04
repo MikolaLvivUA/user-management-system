@@ -10,7 +10,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const options = new DocumentBuilder()
-    .setTitle('Users-microservice API')
+    .setTitle('Notifications-microservice API')
     .setDescription('API Gateway')
     .setVersion('0.1')
     .addBearerAuth()

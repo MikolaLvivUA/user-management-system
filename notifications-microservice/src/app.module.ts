@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-
-//Modules
 import { BullModule } from '@nestjs/bullmq';
-import { RepositoriesModule, UserModule } from './modules';
+
+//Processors
+import { NotificationProcessor } from './processors';
 
 @Module({
   imports: [
     BullModule.forRoot({
       connection: {
-        host: 'redis-mq',
         // host: 'localhost',
+        host: 'redis-mq',
         port: 6379,
       },
       defaultJobOptions: {
@@ -18,9 +18,10 @@ import { RepositoriesModule, UserModule } from './modules';
         attempts: 3,
       },
     }),
-    RepositoriesModule,
-    UserModule,
+    BullModule.registerQueue({
+      name: 'notifications-queue',
+    }),
   ],
-  providers: [],
+  providers: [NotificationProcessor],
 })
 export class AppModule {}
