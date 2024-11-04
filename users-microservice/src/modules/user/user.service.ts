@@ -5,6 +5,7 @@ import { LoggerServiceDecorator } from 'src/common';
 import { UsersRepository } from '../repository';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { QUEUE_DELAY } from "./definitions";
 
 @Injectable()
 export class UsersService {
@@ -27,8 +28,7 @@ export class UsersService {
         },
       });
 
-      await this.userQueue.add('sendNotification', { userId: user.id }, { delay: 10000 });
-      // await this.userQueue.add('sendNotification', { userId: user.id }, { delay: 24 * 60 * 60 * 1000 });
+      await this.userQueue.add('sendNotification', { userId: user.id }, { delay: QUEUE_DELAY || 10000});
       return user;
     } catch (error) {
       throw new BadRequestException(`[create-Users] error: ${error.message}`);
