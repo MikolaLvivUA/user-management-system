@@ -8,8 +8,13 @@ docker-compose up
 ```
 ensure you installed docker on your machine
 
-###
-Swagger documentation
+## Migrations
+After build run DB migrations in user microservice
+```
+npm run prisma:migrate
+```
+
+## Swagger documentation
 ```
 http://localhost:3000/api
 ```
