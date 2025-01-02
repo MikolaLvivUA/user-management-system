@@ -15,9 +15,14 @@ export class UsersDto {
   @Expose()
   lastName: string;
 
-  @ApiProperty({ example: '1234567' })
+  @ApiProperty({ example: 'email@example.com' })
   @IsNotEmpty()
   @IsString()
   @Expose()
+  email: string;
+
+  @ApiProperty({ example: '1234567' })
+  @IsNotEmpty()
+  @IsString()
   password: string;
 }

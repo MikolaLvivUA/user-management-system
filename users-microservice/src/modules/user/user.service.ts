@@ -5,7 +5,8 @@ import { LoggerServiceDecorator } from 'src/common';
 import { UsersRepository } from '../repository';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { QUEUE_DELAY } from "./definitions";
+import { QUEUE_DELAY } from './definitions';
+import { UsersDto } from './dto/users.dto';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +16,7 @@ export class UsersService {
   ) {}
 
   @LoggerServiceDecorator()
-  async create(data: CreateUserDto): Promise<UserResponse> {
+  async create(data: UsersDto): Promise<UserResponse> {
     try {
       const { password, firstName, lastName } = data;
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -28,7 +29,11 @@ export class UsersService {
         },
       });
 
-      await this.userQueue.add('sendNotification', { userId: user.id }, { delay: QUEUE_DELAY || 10000});
+      await this.userQueue.add(
+        'sendNotification',
+        { userId: user.id },
+        { delay: QUEUE_DELAY || 10000 },
+      );
       return user;
     } catch (error) {
       throw new BadRequestException(`[create-Users] error: ${error.message}`);
