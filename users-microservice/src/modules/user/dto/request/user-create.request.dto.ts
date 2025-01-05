@@ -1,3 +1,4 @@
-import { UsersDto } from '../users.dto';
+import { User } from '../../../../../prisma/generated/classes/user';
+import { PickType } from '@nestjs/swagger';
 
-export class CreateUserDto extends UsersDto {}
+export class CreateUserDto extends PickType(User, ['firstName', 'lastName', 'email', 'password']) {}

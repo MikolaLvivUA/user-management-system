@@ -4,7 +4,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { DefaultArgs } from '@prisma/client/runtime/library';
 
-type UsersDelegate = Prisma.userDelegate<DefaultArgs>;
+type UsersDelegate = Prisma.UserDelegate<DefaultArgs>;
 
 @Injectable()
 export class UsersRepository extends PrismaRepository<

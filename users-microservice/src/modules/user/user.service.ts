@@ -1,12 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
-import { CreateUserDto, UserResponse } from './dto';
+import { CreateUserDto, UserListResponse, UserResponse } from './dto';
 import { LoggerServiceDecorator } from 'src/common';
 import { UsersRepository } from '../repository';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { QUEUE_DELAY } from './definitions';
-import { UsersDto } from './dto/users.dto';
 
 @Injectable()
 export class UsersService {
@@ -16,9 +15,9 @@ export class UsersService {
   ) {}
 
   @LoggerServiceDecorator()
-  async create(data: UsersDto): Promise<UserResponse> {
+  async create(data: CreateUserDto): Promise<UserResponse> {
     try {
-      const { password, firstName, lastName } = data;
+      const { password, firstName, lastName, email } = data;
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const user: any = await this.userRepository.create({
@@ -26,6 +25,7 @@ export class UsersService {
           firstName,
           lastName,
           password: hashedPassword,
+          email,
         },
       });
 
@@ -41,9 +41,11 @@ export class UsersService {
   }
 
   @LoggerServiceDecorator()
-  async findAll(): Promise<UserResponse[]> {
+  async findAll(): Promise<UserListResponse[]> {
     try {
-      return await this.userRepository.findMany();
+      const result = await this.userRepository.findMany();
+
+      return result;
     } catch (error) {
       throw new BadRequestException(`[findAll-Users] error: ${error.message}`);
     }
@@ -74,6 +76,7 @@ export class UsersService {
           data: {
             ...data,
             password: hashedPassword,
+            email: data.email,
           },
         });
       }

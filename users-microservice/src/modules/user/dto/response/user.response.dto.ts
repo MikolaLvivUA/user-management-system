@@ -1,27 +1,40 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
-import { UsersDto } from '../users.dto';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { User } from '../../../../../prisma/generated/classes/user';
+import { Expose } from 'class-transformer';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-export class UserResponse extends UsersDto {
+export class UserResponse extends PickType(User, [
+  'id',
+  'firstName',
+  'lastName',
+  'email',
+  'createdAt',
+  'updatedAt',
+] as const) {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
+  @IsNotEmpty()
+  @IsString()
   @Expose()
   id: string;
 
-  @Expose()
-  email: string;
-
+  @ApiProperty({ example: 'John' })
+  @IsNotEmpty()
+  @IsString()
   @Expose()
   firstName: string;
 
+  @ApiProperty({ example: 'Doe' })
+  @IsNotEmpty()
+  @IsString()
   @Expose()
   lastName: string;
 
-  @Exclude()
-  password: string;
-
+  @ApiProperty({ example: 'email@example.com' })
+  @IsNotEmpty()
+  @IsString()
   @Expose()
-  createdAt: Date;
+  email: string;
 
-  @Expose()
-  updatedAt: Date;
+  @Expose() createdAt: Date;
+  @Expose() updatedAt: Date;
 }

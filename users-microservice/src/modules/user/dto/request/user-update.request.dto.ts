@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { UsersDto } from '../users.dto';
+import { User } from '../../../../../prisma/generated/classes/user';
 
-export class UpdateUserDto extends PartialType(UsersDto) {}
+export class UpdateUserDto extends PartialType(User) {}
